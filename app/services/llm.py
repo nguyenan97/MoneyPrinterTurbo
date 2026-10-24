@@ -582,6 +582,11 @@ def _generate_response(
                 # 关闭 CLAUDE.md、skills、hooks、plugins、MCP 等用户级定制；
                 # 鉴权与模型选择不受影响（不能用 --bare，它会禁用 OAuth）。
                 "--safe-mode",
+                # --safe-mode 仍会加载 ~/.claude/settings.json 的 env，其中的
+                # ANTHROPIC_BASE_URL 等会绕过下面的环境变量清理，指向失效代理时
+                # CLI 会反复重试直到超时。工作目录是空临时目录，只保留 project。
+                "--setting-sources",
+                "project",
             ]
             # 模型名留空时沿用 CLI 自己的默认模型，避免这里硬编码的模型 ID
             # 随订阅可用模型变化而失效。

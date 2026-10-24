@@ -2173,6 +2173,23 @@ class TestClaudeCodeProvider(unittest.TestCase):
             llm.CLAUDE_CODE_SYSTEM_PROMPT,
         )
 
+    def test_generation_skips_user_settings(self):
+        """~/.claude/settings.json 的 env（如 ANTHROPIC_BASE_URL）会绕过环境变量清理，必须不加载。"""
+        with (
+            patch.object(llm.shutil, "which", return_value="/usr/bin/claude"),
+            patch.object(
+                llm.subprocess,
+                "run",
+                return_value=self._completed(stdout=self._cli_payload("ok")),
+            ) as run,
+        ):
+            llm._generate_response("write something")
+
+        command = run.call_args.args[0]
+        self.assertIn("--setting-sources", command)
+        sources = command[command.index("--setting-sources") + 1].split(",")
+        self.assertNotIn("user", sources)
+
     def test_prompt_is_sent_through_stdin_not_argv(self):
         """Windows 上 npm 安装的 claude 是 claude.cmd，cmd.exe 会在第一个换行处截断
         参数，多行 prompt 及其后的隔离参数都会丢失，因此 prompt 必须走 stdin。"""
