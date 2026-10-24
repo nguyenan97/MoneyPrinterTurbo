@@ -45,3 +45,10 @@ htmlcov/
 
 # Claude Code 订阅令牌（docker compose 自动读取），禁止提交
 .env
+# 其它本地密钥文件（.env.example 等示例文件仍可提交）
+.env.*
+!.env.example
+*.pem
+*.key
+.credentials.json
+.claude/settings.local.json
